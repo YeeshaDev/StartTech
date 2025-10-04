@@ -1,0 +1,46 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server for a ToDo application with user authentication.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: MuchToDo API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: get the status of the database and cache (if enabled)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A map showing the status of each service
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: A map showing the status of each service, one or more will
+            be 'down'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Show the status of server connections
+      tags:
+      - health
+securityDefinitions:
+  ApiKeyAuth:
+    description: '"Type ''Bearer'' followed by a space and a JWT token."'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
