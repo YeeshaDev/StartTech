@@ -35,4 +35,10 @@ dc-down:
 generate-docs:
 	swag init -g ./cmd/api/main.go -o ./docs
 
-.PHONY: run build clean tidy
+unit-test:
+	go test -v ./...
+
+integration-test:
+	go test -tags=integration -v ./...
+
+.PHONY: run build clean tidy dc-up dc-down generate-docs unit-test integration-test
