@@ -36,7 +36,11 @@ func RegisterRoutes(
 	protected.Use(authMiddleware)
 	{
 		// Protected user routes
-		protected.GET("/users/me", userHandler.GetCurrentUser)
+		userRoutes := protected.Group("/users")
+		userRoutes.GET("/me", userHandler.GetCurrentUser)
+		userRoutes.PUT("/me", userHandler.UpdateUser)
+		userRoutes.PUT("/me/password", userHandler.ChangePassword)
+		userRoutes.DELETE("/me", userHandler.DeleteUser)
 
 		// Protected todo routes
 		todoRoutes := protected.Group("/todos")

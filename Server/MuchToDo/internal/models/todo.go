@@ -1,6 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time" // Import the standard time package
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 // Todo represents a single task in the ToDo list.
 type Todo struct {
@@ -9,8 +12,8 @@ type Todo struct {
 	Title       string             `bson:"title" json:"title" binding:"required"`
 	Description string             `bson:"description" json:"description"`
 	Completed   bool               `bson:"completed" json:"completed"`
-	CreatedAt   primitive.DateTime `bson:"createdAt" json:"createdAt"`
-	UpdatedAt   primitive.DateTime `bson:"updatedAt" json:"updatedAt"`
+	CreatedAt   time.Time          `bson:"createdAt" json:"createdAt"`
+	UpdatedAt   time.Time          `bson:"updatedAt" json:"updatedAt"`
 }
 
 // CreateTodoDTO is the Data Transfer Object for creating a new Todo.

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -12,8 +14,8 @@ type User struct {
 	LastName  string             `bson:"lastName" json:"lastName" binding:"required"`
 	Username  string             `bson:"username" json:"username" binding:"required"`
 	Password  string             `bson:"password" json:"-"` // Never return password
-	CreatedAt primitive.DateTime `bson:"createdAt" json:"createdAt"`
-	UpdatedAt primitive.DateTime `bson:"updatedAt" json:"updatedAt"`
+	CreatedAt time.Time          `bson:"createdAt" json:"createdAt"`
+	UpdatedAt time.Time          `bson:"updatedAt" json:"updatedAt"`
 }
 
 // HashPassword hashes the user's password using bcrypt.
@@ -52,4 +54,17 @@ type PublicUser struct {
 	FirstName string             `json:"firstName"`
 	LastName  string             `json:"lastName"`
 	Username  string             `json:"username"`
+}
+
+// UpdateUserDTO is the data transfer object for updating a user's profile.
+type UpdateUserDTO struct {
+	FirstName *string `json:"firstName"`
+	LastName  *string `json:"lastName"`
+	Username  *string `json:"username"`
+}
+
+// ChangePasswordDTO is the data transfer object for changing a user's password.
+type ChangePasswordDTO struct {
+	OldPassword string `json:"oldPassword" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required,min=8"`
 }

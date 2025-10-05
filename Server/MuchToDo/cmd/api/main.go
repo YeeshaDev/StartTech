@@ -156,7 +156,7 @@ func setupRouter(db *mongo.Client, cfg config.Config, tokenSvc *auth.TokenServic
 
 	// Initialize handlers
 	todoHandler := handlers.NewTodoHandler(todoCollection)
-	userHandler := handlers.NewUserHandler(userCollection, tokenSvc, cacheSvc, db, cfg)
+	userHandler := handlers.NewUserHandler(userCollection, todoCollection, tokenSvc, cacheSvc, db, cfg)
 	healthHandler := handlers.NewHealthHandler(db, cacheSvc, cfg.EnableCache)
 
 	// Auth Middleware

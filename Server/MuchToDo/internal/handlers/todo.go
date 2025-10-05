@@ -66,7 +66,8 @@ func (h *TodoHandler) CreateTodo(c *gin.Context) {
 		return
 	}
 
-	now := primitive.NewDateTimeFromTime(time.Now())
+	// now := primitive.NewDateTimeFromTime(time.Now())
+	now := time.Now()
 	newTodo := models.Todo{
 		UserID:      userID,
 		Title:       dto.Title,
