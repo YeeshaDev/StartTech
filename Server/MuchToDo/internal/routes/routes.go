@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/handlers"
+	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/middleware"
 )
 
 
@@ -17,6 +18,11 @@ func RegisterRoutes(
 	healthHandler *handlers.HealthHandler,
 	authMiddleware gin.HandlerFunc,
 ) {
+	// Add the structured logger middleware first to log all requests.
+	router.Use(middleware.StructuredLogger())
+	// Default Gin recovery middleware (recovers from panics)
+	router.Use(gin.Recovery())
+
 	// Public routes
 	router.GET("/health", healthHandler.CheckHealth)
 

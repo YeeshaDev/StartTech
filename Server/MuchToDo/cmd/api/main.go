@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,6 +38,7 @@ import (
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/handlers"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/middleware"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/routes"
+	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/logger"
 
 	// Swagger imports
 	_ "github.com/Innocent9712/much-to-do/Server/MuchToDo/docs" // This is required for swag to find your docs
@@ -52,17 +54,23 @@ func main() {
 		log.Fatalf("could not load config: %v", err)
 	}
 
+	// --- Logger ---
+	// This must be initialized before any other component that might log.
+	logger.InitLogger(cfg)
+	slog.Info("Logger initialized", "level", cfg.LogLevel, "format", cfg.LogFormat)
+
 	// 2. Connect to Database
 	dbClient, err := database.ConnectMongo(cfg.MongoURI, cfg.DBName)
 	if err != nil {
-		log.Fatalf("could not connect to MongoDB: %v", err)
+		slog.Error("could not connect to MongoDB", slog.Any("error", err))
+		os.Exit(1)
 	}
 	defer func() {
 		if err = dbClient.Disconnect(context.Background()); err != nil {
-			log.Printf("Error disconnecting from MongoDB: %v", err)
+			slog.Error("Error disconnecting from MongoDB", slog.Any("error", err))
 		}
 	}()
-	log.Println("Successfully connected to MongoDB.")
+	slog.Info("Successfully connected to MongoDB.")
 
 	// 3. Initialize Services (Cache, Auth)
 	cacheService := cache.NewCacheService(cfg)
@@ -82,7 +90,7 @@ func main() {
 // but only if caching is enabled and a sentinel key indicates the cache is empty.
 func preloadUsernamesIntoCache(db *mongo.Client, cacheSvc cache.Cache, cfg config.Config) {
 	if !cfg.EnableCache {
-		log.Println("Caching is disabled. Skipping username preloading.")
+		slog.Info("Caching is disabled. Skipping username preloading.")
 		return
 	}
 
@@ -90,11 +98,11 @@ func preloadUsernamesIntoCache(db *mongo.Client, cacheSvc cache.Cache, cfg confi
 	var sentinelVal string
 	err := cacheSvc.Get(context.Background(), usernameCacheSentinelKey, &sentinelVal)
 	if err == nil {
-		log.Println("Username cache already initialized. Skipping preload.")
+		slog.Info("Username cache already initialized. Skipping preload.")
 		return
 	}
 
-	log.Println("Preloading usernames into cache...")
+	slog.Info("Preloading usernames into cache...")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -104,7 +112,7 @@ func preloadUsernamesIntoCache(db *mongo.Client, cacheSvc cache.Cache, cfg confi
 	opts := options.Find().SetProjection(bson.M{"username": 1})
 	cursor, err := userCollection.Find(ctx, bson.D{}, opts)
 	if err != nil {
-		log.Printf("Error querying for usernames to preload: %v", err)
+		slog.Error("Error querying for usernames to preload", slog.Any("error", err))
 		return
 	}
 	defer cursor.Close(ctx)
@@ -116,7 +124,7 @@ func preloadUsernamesIntoCache(db *mongo.Client, cacheSvc cache.Cache, cfg confi
 			Username string `bson:"username"`
 		}
 		if err := cursor.Decode(&result); err != nil {
-			log.Printf("Error decoding username during preload: %v", err)
+			slog.Warn("Error decoding username during preload", slog.Any("error", err))
 			continue
 		}
 		if result.Username != "" {
@@ -126,21 +134,21 @@ func preloadUsernamesIntoCache(db *mongo.Client, cacheSvc cache.Cache, cfg confi
 	}
 
 	if err := cursor.Err(); err != nil {
-		log.Printf("Cursor error during username preload: %v", err)
+		slog.Error("Cursor error during username preload", slog.Any("error", err))
 		return
 	}
 
 	if len(usernamesToCache) > 0 {
 		err := cacheSvc.SetMany(ctx, usernamesToCache, usernameCacheTTL)
 		if err != nil {
-			log.Printf("Error preloading usernames to cache: %v", err)
+			slog.Error("Error preloading usernames to cache", slog.Any("error", err))
 		} else {
 			// Set the sentinel key to prevent re-loading until it expires.
 			cacheSvc.Set(ctx, usernameCacheSentinelKey, "true", usernameCacheTTL)
-			log.Printf("Successfully preloaded %d usernames into the cache.", len(usernamesToCache))
+			slog.Info("Successfully preloaded usernames into cache", "count", len(usernamesToCache))
 		}
 	} else {
-		log.Println("No usernames found to preload.")
+		slog.Info("No usernames found to preload.")
 	}
 }
 
@@ -191,9 +199,10 @@ func startServer(router *gin.Engine, port string) {
 
 	go func() {
 		// Service connections
-		log.Printf("Server listening on port %s", port)
+		slog.Info("Server starting", "port", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			slog.Error("Server listen error", slog.Any("error", err))
+			os.Exit(1)
 		}
 	}()
 
@@ -201,13 +210,14 @@ func startServer(router *gin.Engine, port string) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutting down server...")
+	slog.Info("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		slog.Error("Server forced to shutdown", slog.Any("error", err))
+		os.Exit(1)
 	}
 
-	log.Println("Server exiting.")
+	slog.Info("Server exiting.")
 }
