@@ -20,12 +20,24 @@ The API is built with a clean, layered architecture to separate concerns, making
 To run this project locally, you will need the following installed:
 
 * **Go**: Version 1.21 or later.
-* **Docker** and **Docker Compose**: To easily run the required MongoDB and Redis services.
 * **Swag CLI**: To generate the Swagger API documentation.
+* **Make** (optional, for easier command execution):
+
+  On macOS, you can install `make` via Homebrew if it's not already available:
+
+  ```bash
+  brew install make
+  ```
+
+  On Linux, `make` is usually pre-installed or available via your package manager.
 
 ```bash
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
+
+## Using Make
+
+This project includes a `Makefile` to simplify common development tasks. You can use `make <target>` to run commands such as starting the server, building, running tests, and managing Docker containers.
 
 ## Getting Started
 
@@ -33,7 +45,7 @@ go install github.com/swaggo/swag/cmd/swag@latest
 
 ```bash
 git clone <your-repository-url>
-cd much-todo-api
+cd much-to-do/Server/MuchToDo
 ```
 
 ### 2. Configure Environment Variables
@@ -44,7 +56,11 @@ Create a `.env` file in the root of the project by copying the example.
 cp .env.example .env
 ```
 
-Now, open the `.env` file and **change the** `JWT_SECRET_KEY` to a new, long, random string. You can leave the other variables as they are for local development.
+Now, open the `.env` file and **change the** `JWT_SECRET_KEY` to a new, long, random string.
+
+Also, ensure that the `MONGO_URI` and `DB_NAME` points to your local MongoDB instance and db.
+
+You can leave the other variables as they are for local development.
 
 ### 3. Start Local Dependencies
 
@@ -53,8 +69,10 @@ With Docker running, start the MongoDB and Redis containers using Docker Compose
 ```bash
 docker-compose up -d
 ```
-
-This command will pull the required images and start the services in the background.
+**Or using Make:**
+```bash
+make dc-up
+```
 
 ### 4. Install Go Dependencies
 
@@ -62,6 +80,10 @@ Download the necessary Go modules.
 
 ```bash
 go mod tidy
+```
+**Or using Make:**
+```bash
+make tidy
 ```
 
 ### 5. Generate API Documentation
@@ -71,6 +93,10 @@ Generate the Swagger/OpenAPI documentation from the code comments.
 ```bash
 swag init -g cmd/api/main.go
 ```
+**Or using Make:**
+```bash
+make generate-docs
+```
 
 ### 6. Run the Application
 
@@ -78,6 +104,10 @@ You can now run the API server.
 
 ```bash
 go run ./cmd/api/main.go
+```
+**Or using Make (also generates docs first):**
+```bash
+make run
 ```
 
 The server will start, and you should see log output in your terminal.
@@ -96,6 +126,10 @@ These tests are fast and do not require any external dependencies.
 ```bash
 go test ./...
 ```
+**Or using Make:**
+```bash
+make unit-test
+```
 
 ### Run Integration Tests
 
@@ -104,5 +138,30 @@ These tests require Docker to be running as they spin up their own temporary dat
 ```bash
 INTEGRATION=true go test -v --tags=integration ./...
 ```
+**Or using Make:**
+```bash
+make integration-test
+```
 
 The `INTEGRATION=true` environment variable is required to explicitly enable these tests. The `-v` flag provides verbose output.
+
+## Other Useful Make Commands
+
+- **Build the binary:**  
+  ```bash
+  make build
+  ```
+- **Clean build artifacts:**  
+  ```bash
+  make clean
+  ```
+- **Stop Docker containers:**  
+  ```bash
+  make dc-down
+  ```
+- **Restart Docker containers:**  
+  ```bash
+  make dc-restart
+  ```
+
+Refer to the `Makefile` for more available commands.
