@@ -11,9 +11,9 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
+            "name": "API Support - Innocent",
+            "url": "https://github.com/Innocent9712",
+            "email": "innocent@altschoolafrica.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -993,11 +993,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "MuchToDo API",
-	Description:      "This is a sample server for a ToDo application with user authentication.",
+	Description:      "This is an API for MuchToDo application with user authentication.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

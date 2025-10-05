@@ -1,12 +1,17 @@
 package routes
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/handlers"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/middleware"
+
+	_ "github.com/Innocent9712/much-to-do/Server/MuchToDo/docs"
+	"github.com/Innocent9712/much-to-do/Server/MuchToDo/docs"
 )
 
 
@@ -27,7 +32,18 @@ func RegisterRoutes(
 	router.GET("/health", healthHandler.CheckHealth)
 
 	// Swagger documentation route
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger/*any", func(c *gin.Context) {
+        scheme := "http"
+        if c.Request.TLS != nil || strings.HasPrefix(c.Request.Header.Get("X-Forwarded-Proto"), "https") {
+            scheme = "https"
+        }
+
+        docs.SwaggerInfo.Host = c.Request.Host
+        docs.SwaggerInfo.Schemes = []string{scheme}
+
+        // Delegate to gin-swagger after updating docs
+        ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
+    })
 
 	authRoutes := router.Group("/auth")
 	{

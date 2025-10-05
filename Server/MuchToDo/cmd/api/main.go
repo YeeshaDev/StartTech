@@ -1,13 +1,12 @@
 // @title           MuchToDo API
 // @version         1.0
-// @description     This is a sample server for a ToDo application with user authentication.
+// @description     This is an API for MuchToDo application with user authentication.
 // @termsOfService  http://swagger.io/terms/
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
+// @contact.name   API Support - Innocent
+// @contact.url    https://github.com/Innocent9712
+// @contact.email  innocent@altschoolafrica.com
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-// @host      localhost:8080
 // @BasePath  /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
