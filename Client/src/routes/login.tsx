@@ -46,6 +46,7 @@ function Login() {
             toast.success('Logged in successfully');
             navigate({ to: '/todos' });
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (err: any) => {
             const message = err.response?.data?.error || 'Invalid username or password';
             setError(message);
@@ -121,7 +122,7 @@ function Login() {
                         <button
                             type="submit"
                             disabled={isSubmitting || loginMutation.isPending}
-                            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
                         >
                             {isSubmitting || loginMutation.isPending ? 'Signing in...' : 'Sign in'}
                         </button>

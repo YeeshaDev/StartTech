@@ -54,6 +54,7 @@ function ChangePasswordPage() {
         navigate({ to: '/profile' });
       }, 1500);
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       const message = err.response?.data?.error || 'Failed to change password';
       toast.error(message);

@@ -53,6 +53,7 @@ function ProfilePage() {
       toast.success('Profile updated successfully');
       setIsEditing(false);
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       const message = err.response?.data?.error || 'Failed to update profile';
       toast.error(message);
@@ -237,6 +238,7 @@ function DeleteAccountModal({ onClose }: { onClose: () => void }) {
       logout();
       window.location.href = '/login';
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       const message = err.response?.data?.error || 'Failed to delete account';
       toast.error(message);

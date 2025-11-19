@@ -47,6 +47,7 @@ function Register() {
             toast.success('Account created successfully! Please log in.');
             navigate({ to: '/login' });
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (err: any) => {
             const message = err.response?.data?.error || 'Registration failed';
             setError(message);
