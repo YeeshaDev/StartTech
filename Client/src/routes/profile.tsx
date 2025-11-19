@@ -9,6 +9,20 @@ import { useAuth } from '@/hooks/useAuth';
 import type { UpdateUserDTO } from '@/types/auth.types';
 import { toast } from 'sonner';
 import { User, KeyRound, Trash2, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const updateProfileSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -72,7 +86,7 @@ function ProfilePage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -86,145 +100,149 @@ function ProfilePage() {
             <User className="h-8 w-8 text-indigo-600" />
             My Profile
           </h1>
-          <p className="mt-2 text-gray-600">Manage your account settings and preferences</p>
+          <p className="mt-2 text-muted-foreground">Manage your account settings and preferences</p>
         </div>
 
         {/* Profile Information Card */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-700 border border-indigo-600 rounded-md hover:bg-indigo-50 transition-colors"
-              >
-                Edit Profile
-              </button>
-            )}
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="space-y-4">
-              {/* First Name */}
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
-                <input
-                  id="firstName"
-                  type="text"
-                  disabled={!isEditing}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!isEditing ? 'bg-gray-50 text-gray-600' : ''
-                    }`}
-                  {...register('firstName')}
-                />
-                {errors.firstName && (
-                  <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>
-                )}
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Update your profile details</CardDescription>
               </div>
-
-              {/* Last Name */}
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
-                <input
-                  id="lastName"
-                  type="text"
-                  disabled={!isEditing}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!isEditing ? 'bg-gray-50 text-gray-600' : ''
-                    }`}
-                  {...register('lastName')}
-                />
-                {errors.lastName && (
-                  <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>
-                )}
-              </div>
-
-              {/* Username */}
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  disabled={!isEditing}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${!isEditing ? 'bg-gray-50 text-gray-600' : ''
-                    }`}
-                  {...register('username')}
-                />
-                {errors.username && (
-                  <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>
-                )}
-              </div>
+              {!isEditing && (
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(true)}
+                >
+                  Edit Profile
+                </Button>
+              )}
             </div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="space-y-4">
+                {/* First Name */}
+                <div>
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    disabled={!isEditing}
+                    {...register('firstName')}
+                  />
+                  {errors.firstName && (
+                    <p className="text-destructive text-xs mt-1">{errors.firstName.message}</p>
+                  )}
+                </div>
 
-            {/* Action Buttons */}
-            {isEditing && (
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="submit"
-                  disabled={!isDirty || updateProfileMutation.isPending}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-                >
-                  <Save className="h-4 w-4" />
-                  {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
+                {/* Last Name */}
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    disabled={!isEditing}
+                    {...register('lastName')}
+                  />
+                  {errors.lastName && (
+                    <p className="text-destructive text-xs mt-1">{errors.lastName.message}</p>
+                  )}
+                </div>
+
+                {/* Username */}
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    disabled={!isEditing}
+                    {...register('username')}
+                  />
+                  {errors.username && (
+                    <p className="text-destructive text-xs mt-1">{errors.username.message}</p>
+                  )}
+                </div>
               </div>
-            )}
-          </form>
-        </div>
+
+              {/* Action Buttons */}
+              {isEditing && (
+                <div className="flex gap-3 mt-6">
+                  <Button
+                    type="submit"
+                    disabled={!isDirty || updateProfileMutation.isPending}
+                    className="gap-2"
+                  >
+                    <Save className="h-4 w-4" />
+                    {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </form>
+          </CardContent>
+        </Card>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Change Password */}
-          <Link
-            to="/change-password"
-            className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition-all"
-          >
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <KeyRound className="h-6 w-6 text-indigo-600" />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900">Change Password</h3>
-              <p className="text-sm text-gray-500">Update your account password</p>
-            </div>
+          <Link to="/change-password">
+            <Card className="hover:border-primary transition-colors cursor-pointer h-full">
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <KeyRound className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Change Password</h3>
+                  <p className="text-sm text-muted-foreground">Update your account password</p>
+                </div>
+              </CardContent>
+            </Card>
           </Link>
 
           {/* Delete Account */}
-          <button
+          <Card
+            className="hover:border-destructive transition-colors cursor-pointer h-full"
             onClick={() => setShowDeleteModal(true)}
-            className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-red-300 hover:shadow-sm transition-all text-left"
           >
-            <div className="p-2 bg-red-100 rounded-lg">
-              <Trash2 className="h-6 w-6 text-red-600" />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900">Delete Account</h3>
-              <p className="text-sm text-gray-500">Permanently delete your account</p>
-            </div>
-          </button>
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="p-2 bg-destructive/10 rounded-lg">
+                <Trash2 className="h-6 w-6 text-destructive" />
+              </div>
+              <div>
+                <h3 className="font-medium">Delete Account</h3>
+                <p className="text-sm text-muted-foreground">Permanently delete your account</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Delete Account Modal */}
-        {showDeleteModal && (
-          <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />
-        )}
+        {/* Delete Account Dialog */}
+        <DeleteAccountDialog
+          open={showDeleteModal}
+          onOpenChange={setShowDeleteModal}
+        />
       </div>
     </div>
   );
 }
 
-// Delete Account Modal Component
-function DeleteAccountModal({ onClose }: { onClose: () => void }) {
+// Delete Account Dialog Component
+function DeleteAccountDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { logout } = useAuth();
   const [password, setPassword] = useState('');
   const [confirmed, setConfirmed] = useState(false);
@@ -254,63 +272,68 @@ function DeleteAccountModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Delete Account</h2>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Account</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete your account and remove all your data.
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-800 font-medium mb-2">⚠️ Warning: This action cannot be undone!</p>
-          <p className="text-sm text-red-700">
-            Deleting your account will permanently remove all your data, including todos and profile information.
-          </p>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>
+            <p className="font-medium mb-1">⚠️ Warning: This action cannot be undone!</p>
+            <p className="text-sm">
+              Deleting your account will permanently remove all your data, including tasks and profile information.
+            </p>
+          </AlertDescription>
+        </Alert>
 
-        <div className="space-y-4 mb-6">
-          <div className="flex items-start">
-            <input
+        <div className="space-y-4">
+          <div className="flex items-start space-x-2">
+            <Checkbox
               id="confirm-delete"
-              type="checkbox"
               checked={confirmed}
-              onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              onCheckedChange={(checked) => setConfirmed(checked as boolean)}
             />
-            <label htmlFor="confirm-delete" className="ml-2 text-sm text-gray-700">
+            <Label
+              htmlFor="confirm-delete"
+              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               I understand this action cannot be undone and all my data will be permanently deleted
-            </label>
+            </Label>
           </div>
 
           <div>
-            <label htmlFor="password-confirm" className="block text-sm font-medium text-gray-700 mb-1">
-              Enter your password to confirm
-            </label>
-            <input
+            <Label htmlFor="password-confirm">Enter your password to confirm</Label>
+            <Input
               id="password-confirm"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Your password"
             />
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={handleDelete}
-            disabled={!confirmed || !password || deleteAccountMutation.isPending}
-            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors"
-          >
-            {deleteAccountMutation.isPending ? 'Deleting...' : 'Delete My Account'}
-          </button>
-          <button
-            onClick={onClose}
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
             disabled={deleteAccountMutation.isPending}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
           >
             Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={!confirmed || !password || deleteAccountMutation.isPending}
+          >
+            {deleteAccountMutation.isPending ? 'Deleting...' : 'Delete My Account'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
