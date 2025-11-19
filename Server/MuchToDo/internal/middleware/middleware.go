@@ -4,12 +4,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/auth"
+	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/config"
+	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/utils"
+	"github.com/gin-gonic/gin"
 )
 
 // AuthMiddleware creates a gin.HandlerFunc for JWT authentication.
-func AuthMiddleware(tokenSvc *auth.TokenService) gin.HandlerFunc {
+func AuthMiddleware(tokenSvc *auth.TokenService, cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var tokenString string
 
@@ -24,7 +26,7 @@ func AuthMiddleware(tokenSvc *auth.TokenService) gin.HandlerFunc {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header not provided"})
 				return
 			}
-			
+
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header format must be Bearer {token}"})
@@ -32,7 +34,7 @@ func AuthMiddleware(tokenSvc *auth.TokenService) gin.HandlerFunc {
 			}
 			tokenString = parts[1]
 		}
-		
+
 		if tokenString == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "No token found"})
 			return
@@ -42,7 +44,8 @@ func AuthMiddleware(tokenSvc *auth.TokenService) gin.HandlerFunc {
 		userID, err := tokenSvc.ValidateToken(tokenString)
 		if err != nil {
 			// Clear invalid cookie if it exists
-			c.SetCookie("token", "", -1, "/", "localhost", false, true)
+			cookieDomain := utils.GetCookieDomain(c, cfg.CookieDomains)
+			c.SetCookie("token", "", -1, "/", cookieDomain, cfg.SecureCookie, true)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			return
 		}

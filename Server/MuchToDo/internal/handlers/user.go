@@ -19,27 +19,28 @@ import (
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/cache"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/config"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/models"
+	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/utils"
 )
 
 // UserHandler holds dependencies for user-related handlers.
 type UserHandler struct {
-	collection *mongo.Collection
+	collection     *mongo.Collection
 	todoCollection *mongo.Collection
-	tokenSvc   *auth.TokenService
-	cache      cache.Cache
-	dbClient   *mongo.Client // Added for cache refreshing
-	config     config.Config // Added for cache refreshing
+	tokenSvc       *auth.TokenService
+	cache          cache.Cache
+	dbClient       *mongo.Client // Added for cache refreshing
+	config         config.Config // Added for cache refreshing
 }
 
 // NewUserHandler creates a new UserHandler.
 func NewUserHandler(collection *mongo.Collection, todoCollection *mongo.Collection, tokenSvc *auth.TokenService, cache cache.Cache, db *mongo.Client, cfg config.Config) *UserHandler {
 	return &UserHandler{
-		collection: collection,
+		collection:     collection,
 		todoCollection: todoCollection,
-		tokenSvc:   tokenSvc,
-		cache:      cache,
-		dbClient:   db,
-		config:     cfg,
+		tokenSvc:       tokenSvc,
+		cache:          cache,
+		dbClient:       db,
+		config:         cfg,
 	}
 }
 
@@ -81,7 +82,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 		Username:  strings.ToLower(dto.Username),
 		CreatedAt: now,
 		UpdatedAt: now,
-
 	}
 
 	if err := newUser.HashPassword(dto.Password); err != nil {
@@ -94,7 +94,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
-	
+
 	// Username is now taken, so cache this information
 	usernameCacheKey := fmt.Sprintf("username-taken:%s", newUser.Username)
 	h.cache.Set(context.Background(), usernameCacheKey, true, 5*time.Minute)
@@ -141,7 +141,8 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	// Set httpOnly cookie for web clients
-	c.SetCookie("token", token, h.tokenSvc.GetExpirationSeconds(), "/", "localhost", false, true)
+	cookieDomain := utils.GetCookieDomain(c, h.config.CookieDomains)
+	c.SetCookie("token", token, h.tokenSvc.GetExpirationSeconds(), "/", cookieDomain, h.config.SecureCookie, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
@@ -163,7 +164,8 @@ func (h *UserHandler) Login(c *gin.Context) {
 // @Success      200  {object}  map[string]string "{'message': 'Logged out successfully'}"
 // @Router       /auth/logout [post]
 func (h *UserHandler) Logout(c *gin.Context) {
-	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	cookieDomain := utils.GetCookieDomain(c, h.config.CookieDomains)
+	c.SetCookie("token", "", -1, "/", cookieDomain, h.config.SecureCookie, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }
 
@@ -386,11 +388,11 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	}
 
 	// Clear the session cookie
-	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	cookieDomain := utils.GetCookieDomain(c, h.config.CookieDomains)
+	c.SetCookie("token", "", -1, "/", cookieDomain, false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Account deleted successfully"})
 }
-
 
 // CheckUsernameAvailability godoc
 // @Summary      Check if a username is available
@@ -440,7 +442,6 @@ func (h *UserHandler) CheckUsernameAvailability(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"available": true, "message": "Username is available"})
 }
 
-
 // GetCurrentUser godoc
 // @Summary      Get current user's profile
 // @Description  Retrieves the profile of the user corresponding to the provided JWT
@@ -458,7 +459,7 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	
+
 	userID, err := primitive.ObjectIDFromHex(userIDHex.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID in token"})
@@ -471,7 +472,7 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, models.PublicUser{
 		ID:        user.ID,
 		FirstName: user.FirstName,
@@ -479,7 +480,6 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 		Username:  user.Username,
 	})
 }
-
 
 // triggerRandomCacheRefresh starts a background refresh of the username cache
 // based on a random chance to keep the cache fresh over time.
@@ -505,7 +505,9 @@ func (h *UserHandler) triggerRandomCacheRefresh() {
 
 			usernamesToCache := make(map[string]interface{})
 			for cursor.Next(ctx) {
-				var result struct{ Username string `bson:"username"` }
+				var result struct {
+					Username string `bson:"username"`
+				}
 				if err := cursor.Decode(&result); err == nil && result.Username != "" {
 					cacheKey := fmt.Sprintf("username-taken:%s", result.Username)
 					usernamesToCache[cacheKey] = true

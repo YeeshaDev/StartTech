@@ -35,9 +35,9 @@ import (
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/config"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/database"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/handlers"
+	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/logger"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/middleware"
 	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/routes"
-	"github.com/Innocent9712/much-to-do/Server/MuchToDo/internal/logger"
 
 	// Swagger imports
 	_ "github.com/Innocent9712/much-to-do/Server/MuchToDo/docs" // This is required for swag to find your docs
@@ -151,11 +151,13 @@ func preloadUsernamesIntoCache(db *mongo.Client, cacheSvc cache.Cache, cfg confi
 	}
 }
 
-
 // setupRouter initializes the Gin router and sets up the routes.
 func setupRouter(db *mongo.Client, cfg config.Config, tokenSvc *auth.TokenService, cacheSvc cache.Cache) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
+
+	// CORS Middleware
+	router.Use(middleware.CORSMiddleware(cfg))
 
 	// Initialize collections
 	todoCollection := db.Database(cfg.DBName).Collection("todos")
@@ -167,7 +169,7 @@ func setupRouter(db *mongo.Client, cfg config.Config, tokenSvc *auth.TokenServic
 	healthHandler := handlers.NewHealthHandler(db, cacheSvc, cfg.EnableCache)
 
 	// Auth Middleware
-	authMiddleware := middleware.AuthMiddleware(tokenSvc)
+	authMiddleware := middleware.AuthMiddleware(tokenSvc, cfg)
 
 	// Register all routes
 	routes.RegisterRoutes(router, userHandler, todoHandler, healthHandler, authMiddleware)
