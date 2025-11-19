@@ -27,16 +27,16 @@ export function CreateTodo() {
 
     const createMutation = useMutation({
         mutationFn: async (data: CreateTodoFormValues) => {
-            const response = await apiClient.post('/todos', data);
+            const response = await apiClient.post('/tasks', data);
             return response.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['todos'] });
             reset();
-            toast.success('Todo added');
+            toast.success('Task added');
         },
         onError: () => {
-            toast.error('Failed to create todo');
+            toast.error('Failed to create task');
         },
     });
 

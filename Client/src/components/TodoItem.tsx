@@ -14,7 +14,7 @@ export function TodoItem({ todo }: TodoItemProps) {
 
     const toggleMutation = useMutation({
         mutationFn: async () => {
-            const response = await apiClient.put(`/todos/${todo.id}`, {
+            const response = await apiClient.put(`/tasks/${todo.id}`, {
                 completed: !todo.completed,
             });
             return response.data;
@@ -23,20 +23,20 @@ export function TodoItem({ todo }: TodoItemProps) {
             queryClient.invalidateQueries({ queryKey: ['todos'] });
         },
         onError: () => {
-            toast.error('Failed to update todo');
+            toast.error('Failed to update task');
         },
     });
 
     const deleteMutation = useMutation({
         mutationFn: async () => {
-            await apiClient.delete(`/todos/${todo.id}`);
+            await apiClient.delete(`/tasks/${todo.id}`);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['todos'] });
-            toast.success('Todo deleted');
+            toast.success('Task deleted');
         },
         onError: () => {
-            toast.error('Failed to delete todo');
+            toast.error('Failed to delete task');
         },
     });
 

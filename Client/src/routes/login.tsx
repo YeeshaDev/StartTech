@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { apiClient } from '@/lib/apiClient';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 const loginSchema = z.object({
     username: z.string().min(1, 'Username is required'),
@@ -21,6 +22,7 @@ export const Route = createFileRoute('/login')({
 function Login() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const { setUser } = useAuth();
     const [error, setError] = useState<string | null>(null);
 
     const {
@@ -37,6 +39,9 @@ function Login() {
             return response.data;
         },
         onSuccess: (data) => {
+            // Update the user in the auth context
+            setUser(data.user);
+            // Also set in query cache
             queryClient.setQueryData(['currentUser'], data.user);
             toast.success('Logged in successfully');
             navigate({ to: '/todos' });

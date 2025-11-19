@@ -156,9 +156,6 @@ func setupRouter(db *mongo.Client, cfg config.Config, tokenSvc *auth.TokenServic
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	// CORS Middleware
-	router.Use(middleware.CORSMiddleware(cfg))
-
 	// Initialize collections
 	todoCollection := db.Database(cfg.DBName).Collection("todos")
 	userCollection := db.Database(cfg.DBName).Collection("users")
@@ -168,8 +165,13 @@ func setupRouter(db *mongo.Client, cfg config.Config, tokenSvc *auth.TokenServic
 	userHandler := handlers.NewUserHandler(userCollection, todoCollection, tokenSvc, cacheSvc, db, cfg)
 	healthHandler := handlers.NewHealthHandler(db, cacheSvc, cfg.EnableCache)
 
-	// Auth Middleware
+	// Middleware
+	corsMiddleware := middleware.CORSMiddleware(cfg.AllowedOrigins)
+	// corsMiddleware := middleware.CORSMiddleware2()
 	authMiddleware := middleware.AuthMiddleware(tokenSvc, cfg)
+
+	// Apply CORS middleware to the router
+	router.Use(corsMiddleware)
 
 	// Register all routes
 	routes.RegisterRoutes(router, userHandler, todoHandler, healthHandler, authMiddleware)
@@ -181,6 +183,12 @@ func setupRouter(db *mongo.Client, cfg config.Config, tokenSvc *auth.TokenServic
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Welcome to MuchToDo API"})
+	})
+
+	// Test route to debug /todos issue
+	router.GET("/test-todos", func(c *gin.Context) {
+		println("=== TEST TODOS ROUTE HIT ===")
+		c.JSON(http.StatusOK, gin.H{"message": "Test todos route works!"})
 	})
 
 	// Handle 404

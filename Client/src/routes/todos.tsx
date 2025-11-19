@@ -25,7 +25,7 @@ function Todos() {
     const { data: todos, isLoading: isTodosLoading, error } = useQuery({
         queryKey: ['todos'],
         queryFn: async () => {
-            const response = await apiClient.get('/todos');
+            const response = await apiClient.get('/tasks');
             return response.data as Todo[];
         },
         enabled: !!user,
