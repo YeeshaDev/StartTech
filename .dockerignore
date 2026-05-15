@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+
+# Documentation & evidence
+README.md
+evidence/
+
+# Kubernetes & scripts (not needed in image)
+kubernetes/
+scripts/
+
+# Docker files themselves
+docker-compose.yml
+.dockerignore
+
+# Go build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+main
+
+# Environment files (never bake secrets into image)
+.env
+.env.*
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo

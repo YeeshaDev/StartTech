@@ -26,7 +26,20 @@ go.work.sum
 
 # env file
 .env
+.env.*
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Compiled Go binary
+main
+
+# Temporary files
+/tmp/
+*.tar
