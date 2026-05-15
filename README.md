@@ -215,11 +215,10 @@ bash scripts/k8s-cleanup.sh
 
 Screenshots for submission are stored in the `evidence/` folder:
 
-1. `01-docker-build.png` — Docker image build completing
-2. `02-docker-compose-up.png` — `docker compose up` running
-3. `03-docker-health-check.png` — `/health` endpoint responding
-4. `04-kind-cluster-create.png` — Kind cluster creation
-5. `05-k8s-pods-running.png` — `kubectl get pods -n muchtodo`
-6. `06-k8s-services.png` — `kubectl get services -n muchtodo`
-7. `07-k8s-ingress.png` — `kubectl get ingress -n muchtodo`
-8. `08-app-via-k8s.png` — API responding through port-forward
+1. `docker-build.png` — Docker image build completing
+2. `docker-compose-1.png & docker-compose-2.png` — `docker compose up` running
+3. `docker-health-check.png` — `/health` endpoint responding
+4. `cluster-creation.png` — Kind cluster creation
+5. `deployment.png` — Kubernetes deployments running
+6. `kubectl-cmd` — Kubectl commands showing `kubectl get pods -n muchtodo`, `kubectl get services -n muchtodo`, `kubectl get ingress -n muchtodo`
+7. `port-service.png` — Application accessible through a NodePort Service type to the host or Kubernetes ingress.
