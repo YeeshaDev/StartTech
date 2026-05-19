@@ -66,7 +66,7 @@ jobs:
     name: Build & Push to ECR
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && github.event_name == 'push'
     defaults:
       run:
         working-directory: Server/MuchToDo
@@ -130,7 +130,7 @@ jobs:
     name: Deploy to EC2 ASG
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && github.event_name == 'push'
 
     steps:
       - name: Checkout repository
