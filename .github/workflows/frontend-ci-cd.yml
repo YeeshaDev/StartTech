@@ -2,10 +2,10 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [main, feature/full-stack]
+    branches: [master, main, feature/full-stack]
     paths: ['Client/**']
   pull_request:
-    branches: [main]
+    branches: [master, main]
     paths: ['Client/**']
 
 jobs:
