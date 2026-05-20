@@ -31,6 +31,23 @@ func LoadConfig(path string) (config Config, err error) {
 
 	viper.AutomaticEnv()
 
+	// Explicitly bind every key to its env var so Viper registers them even
+	// when no config file is present (e.g. distroless Docker images without .env).
+	// Without BindEnv, AutomaticEnv+Unmarshal silently skips unregistered keys.
+	_ = viper.BindEnv("PORT")
+	_ = viper.BindEnv("MONGO_URI")
+	_ = viper.BindEnv("DB_NAME")
+	_ = viper.BindEnv("JWT_SECRET_KEY")
+	_ = viper.BindEnv("JWT_EXPIRATION_HOURS")
+	_ = viper.BindEnv("ENABLE_CACHE")
+	_ = viper.BindEnv("REDIS_ADDR")
+	_ = viper.BindEnv("REDIS_PASSWORD")
+	_ = viper.BindEnv("LOG_LEVEL")
+	_ = viper.BindEnv("LOG_FORMAT")
+	_ = viper.BindEnv("COOKIE_DOMAINS")
+	_ = viper.BindEnv("SECURE_COOKIE")
+	_ = viper.BindEnv("ALLOWED_ORIGINS")
+
 	// Set default values
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("ENABLE_CACHE", false)
