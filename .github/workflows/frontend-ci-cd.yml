@@ -90,8 +90,8 @@ jobs:
           aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} \
             --delete \
             --cache-control "no-cache" \
-            --include "*.html" \
             --exclude "*" \
+            --include "*.html" \
             --metadata-directive REPLACE
 
       - name: Invalidate CloudFront distribution
